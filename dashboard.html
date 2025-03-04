@@ -10,7 +10,6 @@
     <header class="dashboard-header">
         <h1>Welcome to Salon</h1>
         <h2>Hello, <span id="user-name">Guest</span></h2>
-        <button class="logout-btn" onclick="logout()">Logout</button>
     </header>    
     
     <div class="dashboard-container">
@@ -36,6 +35,9 @@
             <ul id="appointments-list"></ul>
         </section>
     </div>
+    <footer>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </footer>
     
     <script>
         document.addEventListener("DOMContentLoaded", async () => {
