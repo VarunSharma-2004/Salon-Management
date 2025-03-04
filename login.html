@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salon Management</title>
+    <link rel="stylesheet" href="style_login.css">
+</head>
+<body>
+    <div class="container" id="auth-container">
+        <h2>Login / Register</h2>
+        <div class="input-group">
+            <input type="text" id="name" placeholder="Name (for register)" required>
+        </div>
+        <div class="input-group">
+            <input type="email" id="email" placeholder="Email" required>
+        </div>
+        <div class="input-group">
+            <input type="password" id="password" placeholder="Password" required>
+        </div>
+        <div class="button-group">
+            <button class="btn register" onclick="register()">Register</button>
+            <button class="btn login" onclick="login()">Login</button>
+        </div>
+        <p id="message"></p>
+    </div>
+    <script src="script_login.js"></script>
+</body>
+</html>
