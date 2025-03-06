@@ -1,9 +1,8 @@
 {
-    "version": 2,
-    "builds": [
-        {"src": "main.py", "use": "@vercel/python"}
-    ],
-    "routes": [
-        {"src": "/(.*)", "dest": "main.py"}
-    ]
+  "build": {
+    "env": {
+      "MYSQLCLIENT_CFLAGS": "-I/usr/include/mysql",
+      "MYSQLCLIENT_LDFLAGS": "-L/usr/lib/x86_64-linux-gnu -lmysqlclient"
+    }
+  }
 }
