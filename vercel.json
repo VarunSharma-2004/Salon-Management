@@ -4,9 +4,7 @@
       "MYSQLCLIENT_CFLAGS": "-I/usr/include/mysql",
       "MYSQLCLIENT_LDFLAGS": "-L/usr/lib/x86_64-linux-gnu -lmysqlclient"
     }
-  }
-}
-{
+  },
   "functions": {
     "api/*.py": {
       "runtime": "python3.10"
