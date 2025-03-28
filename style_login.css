@@ -1,0 +1,192 @@
+/* Improved Login Page Styles */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    background-size: 400% 400%;
+    animation: gradientBG 10s ease infinite;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    opacity: 0;
+    animation: fadeInPage 1s ease-in-out forwards;
+}
+
+/* Background Animation */
+@keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Page Fade-in Animation */
+@keyframes fadeInPage {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Glassmorphism Container */
+.container {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(15px);
+    padding: 35px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    width: 350px;
+    transition: transform 0.3s ease, opacity 0.5s ease-in-out;
+    opacity: 0;
+    transform: scale(0.9);
+    animation: fadeInBox 1s ease-in-out forwards 0.5s;
+}
+
+@keyframes fadeInBox {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.container:hover {
+    transform: scale(1.02);
+}
+
+/* Titles */
+h1 {
+    color: white;
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 25px;
+    animation: slideDown 1s ease-out 0.5s forwards;
+    opacity: 0;
+}
+
+h2 {
+    color: white;
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 25px;
+    animation: slideDown 1s ease-out 0.7s forwards;
+    opacity: 0;
+}
+
+/* Titles Slide-down Animation */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Input Fields */
+.input-group {
+    position: relative;
+    margin-bottom: 15px;
+    opacity: 0;
+    animation: fadeInInputs 1s ease-in-out forwards 0.9s;
+}
+
+@keyframes fadeInInputs {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+input {
+    width: 90%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    outline: none;
+    font-size: 16px;
+    background: rgba(255, 255, 255, 0.25);
+    color: white;
+    transition: 0.3s;
+}
+
+input::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+input:focus {
+    background: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+}
+
+/* Buttons */
+.button-group {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+    opacity: 0;
+    animation: fadeInInputs 1s ease-in-out forwards 1.1s;
+}
+
+.btn {
+    flex: 1;
+    padding: 12px;
+    margin: 5px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.3s ease-in-out;
+}
+
+/* Gradient Buttons */
+.login {
+    background: linear-gradient(135deg, #4caf50, #2e7d32);
+    color: white;
+}
+
+/* Hover Effects */
+.login:hover {
+    background: linear-gradient(135deg, #2e7d32, #1b5e20);
+    box-shadow: 0px 0px 10px rgba(46, 125, 50, 0.7);
+    transform: translateY(-3px);
+}
+
+/* Button Bounce Effect */
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+.btn:hover {
+    animation: bounce 0.5s ease-in-out;
+}
+
+/* Fullscreen Entry Effect */
+@keyframes zoomIn {
+    from {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+body:fullscreen {
+    animation: zoomIn 0.5s ease-in-out;
+}
+
+/* Responsive Design */
+@media (max-width: 400px) {
+    .container {
+        width: 90%;
+    }
+}

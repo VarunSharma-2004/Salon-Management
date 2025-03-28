@@ -1,0 +1,294 @@
+/* Global Styles */
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(270deg, #6a11cb, #2575fc);
+    background-size: 400% 400%;
+    animation: gradientShift 10s ease infinite;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+    color: white;
+    transition: background 0.3s ease-in-out;
+    overflow: hidden;
+    height: 100%;
+}
+
+/* Animated background gradient */
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Page Load Animation */
+.dashboard-container {
+    opacity: 0;
+    transform: translateY(30px);
+    animation: fadeInUp 0.6s ease-in-out forwards;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Header */
+.dashboard-header {
+    text-align: center;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 600px;
+    margin-bottom: 20px;
+    max-height: 90vh;
+    overflow: auto;
+}
+
+h1 {
+    font-size: 26px;
+    margin-bottom: 10px;
+}
+
+h2 {
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+/* Dashboard Layout */
+.dashboard-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    width: 90%;
+    max-width: 1200px;
+    margin: auto;
+}
+
+/* Sections */
+.services-section, .booking-section, .appointments-section {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+/* Hover Lift Effect */
+.services-section:hover, 
+.booking-section:hover, 
+.appointments-section:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Buttons */
+button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    border: none;
+    background-color: #007BFF;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s ease-in-out, transform 0.1s ease-in-out;
+}
+
+/* Button Hover */
+button:hover {
+    background-color: #0056b3;
+}
+
+/* Button Click Animation */
+button:active {
+    transform: scale(0.95);
+}
+
+/* Logout Button */
+.logout-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background-color: #d9534f;
+    padding: 10px 15px;
+    border-radius: 8px;
+    width: auto;
+    display: inline-block;
+    text-align: center;
+}
+
+.logout-btn:hover {
+    background-color: #c9302c;
+}
+
+/* Input Fields */
+input, select {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    border: none;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: white;
+    font-size: 16px;
+    outline: none;
+    text-align: center;
+}
+
+/* Glowing Border Effect */
+input:focus, select:focus {
+    border: 2px solid #ffffff;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+    transition: box-shadow 0.3s ease-in-out;
+}
+
+/* Dropdown Fix */
+select {
+    appearance: none;
+    cursor: pointer;
+}
+
+select option {
+    background: white;
+    color: black;
+}
+
+/* Fixing Date & Time Alignment */
+.date-time-container {
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+/* Fixing uneven size of date and time fields */
+.date-time-container input {
+    flex: 1;
+    padding: 12px;
+    font-size: 16px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    outline: none;
+    text-align: center;
+    min-width: 0;
+}
+
+/* Ensure both inputs are of equal width */
+.date-time-container input[type="date"],
+.date-time-container input[type="time"] {
+    width: 45%;
+}
+
+/* Placeholder visibility fix */
+.date-time-container input::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* Appointment List */
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+li {
+    background: rgba(255, 255, 255, 0.3);
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.3s ease-in-out;
+}
+
+/* Hover Effect for Appointment Items */
+li:hover {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+/* Appointment Delete Button */
+li button {
+    width: auto;
+    padding: 6px 12px;
+    background-color: red;
+    font-size: 14px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+li button:hover {
+    background-color: darkred;
+}
+
+/* Notification Pop-in Effect */
+.notification {
+    transform: scale(0.8);
+    opacity: 0;
+    animation: popIn 0.5s ease-in-out forwards;
+}
+
+@keyframes popIn {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    80% {
+        transform: scale(1.05);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Dark Mode Support */
+.dark-mode {
+    background: linear-gradient(to bottom, #2c3e50, #1a1a2e);
+}
+
+.dark-mode h2 {
+    color: #f1f1f1;
+}
+
+.dark-mode input, 
+.dark-mode select {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode li {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .dashboard-container {
+        grid-template-columns: 1fr;
+    }
+
+    /* Stack Date & Time inputs on mobile */
+    .date-time-container {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .date-time-container input {
+        width: 100%;
+    }
+}
