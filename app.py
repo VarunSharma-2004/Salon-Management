@@ -50,6 +50,9 @@ CORS(app)
 @app.route('/', methods=['GET', 'HEAD'])
 def home():
     return render_template('login.html')
+@app.route('/register', methods=['GET'])
+def register_page():
+    return render_template('register.html')
 
 # Configure Database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///salon.db'
