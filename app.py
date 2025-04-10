@@ -105,6 +105,7 @@ def login():
     return jsonify({"error": "Invalid email or password"}), 401
 
 #Get User Name
+@login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 @app.route('/user/<int:user_id>', methods=['GET'])
