@@ -47,7 +47,7 @@ from flask import render_template
 app = Flask(__name__)
 CORS(app)
 
-@app.route('/')
+@app.route('/', methods=['GET', 'HEAD'])
 def home():
     return render_template('login.html')
 
