@@ -53,7 +53,9 @@ def home():
 @app.route('/register', methods=['GET'])
 def register_page():
     return render_template('register.html')
-
+@app.route('/adminlogin', methods=['GET'])
+def register_page():
+    return render_template('admin_login.html')
 # Configure Database
 import os
 basedir = os.path.abspath(os.path.dirname(__file__))
