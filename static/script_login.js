@@ -12,7 +12,7 @@ async function login() {
     }
 
     try {
-        const response = await fetch("/", {
+        const response = await fetch("/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email, password })
@@ -23,7 +23,7 @@ async function login() {
         if (response.ok && result.user_id) {
             localStorage.setItem("user_id", result.user_id);
             showMessage("Login successful! Redirecting...", "success");
-            setTimeout(() => window.location.href = "/dashboard", 1500);
+            setTimeout(() => window.location.href = "dashboard.html", 1500);
         } else {
             showMessage(result.error || "Login failed. Please try again.", "error");
         }
