@@ -99,7 +99,7 @@ def register():
     return jsonify({"message": "User registered successfully!"}), 201
 
 # User Login
-@app.route('/login', methods=['POST'])
+@app.route('/api/login', methods=['POST'])
 def login():
     data = request.get_json()
     user = User.query.filter_by(email=data['email']).first()
