@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salon Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style_dashboard.css')}}">
+</head>
+<body>
+    <header class="dashboard-header">
+        <h1>Welcome to Salon</h1>
+        <h2>Hello, <span id="user-name">Guest</span></h2>
+    </header>    
+    
+    <div class="dashboard-container">
+        <section class="services-section">
+            <h2>Available Services</h2>
+            <ul id="services-list"></ul>
+        </section>
+        
+        <section class="booking-section">
+            <h2>Book an Appointment</h2>
+            <select id="service-select"></select>
+            
+            <div class="appointment-datetime">
+                <input type="date" id="appointment-date" required>
+                <input type="time" id="appointment-time" required>
+            </div>
+
+            <button id="book-appointment-btn">Book Appointment</button>
+            <h4>___________________</h4>
+            <h5>We are here to provide you the Best Services !!!</h5>
+            <h4>___________________</h4>
+        </section>
+        
+        <section class="appointments-section">
+            <h2>Your Appointments</h2>
+            <ul id="appointments-list"></ul>
+        </section>
+    </div>
+    <footer>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </footer>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            const userId = localStorage.getItem("user_id");
+            
+            if (!userId) {
+                window.location.href = "login.html";
+                return;
+            }
+    
+            // Fetch user details from the backend
+            try {
+                const response = await fetch(`http://127.0.0.1:5000/user/${userId}`);
+                const userData = await response.json();
+    
+                if (userData.name) {
+                    document.getElementById("user-name").textContent = userData.name;
+                } else {
+                    document.getElementById("user-name").textContent = "Guest";
+                }
+            } catch (error) {
+                console.error("Error fetching user details:", error);
+                document.getElementById("user-name").textContent = "Guest";
+            }
+        });
+
+        function logout() {
+            localStorage.removeItem("user_id");
+            window.location.href = "login.html";
+        }
+    </script>
+
+    <script src="{{ url_for('static', filename='script_dashboard.js')}}"></script>
+
+    <style>
+        /* Styling for Dashboard Header */
+        .dashboard-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            color: white;
+        }
+
+        /* Styling for Logout Button */
+        .logout-btn {
+            background-color: red;
+            color: white;
+            border: none;
+            padding: 5px 12px;  /* Smaller button */
+            font-size: 14px;     /* Reduced font size */
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        /* Styling for Date & Time Inputs */
+        .appointment-datetime {
+            display: flex;
+            gap: 10px;
+            justify-content: space-between;
+        }
+
+        #appointment-date,
+        #appointment-time {
+            flex: 1;
+            min-width: 120px;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+    </style>
+</body>
+</html>

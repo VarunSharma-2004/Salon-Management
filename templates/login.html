@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salon Management</title>
+    <link rel="stylesheet" href="{{ url_for('static', filenstyle_login.css')}}">
+</head>
+<body>
+    <div class="container" id="auth-container">
+        <h1>Welcome to Salon !!!</h1>
+        <h2>Login</h2>
+        <div class="input-group">
+            <input type="email" id="email" placeholder="Email" required>
+        </div>
+        <div class="input-group">
+            <input type="password" id="password" placeholder="Password" required>
+        </div>
+        <div class="button-group">
+            <button class="btn login" onclick="login();">Login</button>
+        </div>
+        <p id="message"></p>
+        <p class="register-link">New user? <a href="register.html">Register here</a></p>
+        <p class="register-link">Admin? <a href="admin_login.html">Login here</a></p>
+    </div>
+    <script src="{{ url_for('static', filename='script_login.js')}}"></script>
+</body>
+</html>

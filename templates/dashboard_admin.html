@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salon Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style_dashboard_admin.css')}}">
+</head>
+<body>
+    <div class="dashboard-header">
+        <h1>Admin Dashboard</h1>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+    <div class="dashboard-container">
+        <div class="appointments-section">
+            <h2 class="appointments-heading">All Appointments</h2>
+            <ul id="appointments-list"></ul>
+        </div>
+        <div class="services-section">
+            <h2>Manage Services</h2>
+            <form id="add-service-form">
+                <input type="text" id="service-name" placeholder="Service Name" required>
+                <input type="number" id="service-price" placeholder="Price(Rs.)" required>
+                <input type="text" id="service-duration" placeholder="Duration(in mins)" required>
+                <div class="button-group">
+                    <button type="submit">Add Service</button>
+                    <button type="button" class="delete-btn">Delete</button>
+                </div>
+            </form>
+            <ul id="services-list"></ul>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='script_dashboard_admin.js')}}"></script>
+</body>
+</html>
