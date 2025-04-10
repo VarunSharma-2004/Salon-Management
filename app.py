@@ -55,7 +55,9 @@ def register_page():
     return render_template('register.html')
 
 # Configure Database
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///salon.db'
+import os
+basedir = os.path.abspath(os.path.dirname(__file__))
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'salon.db')
 app.config['SECRET_KEY'] = 'your_secret_key'
 
 db = SQLAlchemy(app)
