@@ -87,7 +87,7 @@ class Appointment(db.Model):
     status = db.Column(db.String(20), default="Booked")
 
 # User Registration API
-@app.route('/register', methods=['POST'])
+@app.route('/api/register', methods=['POST'])
 def register():
     data = request.get_json()
     hashed_password = bcrypt.generate_password_hash(data['password']).decode('utf-8')
