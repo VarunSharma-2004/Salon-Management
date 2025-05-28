@@ -46,6 +46,7 @@ from flask import render_template
 from urllib.parse import quote
 from dotenv import load_dotenv
 load_dotenv()
+SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")
 
 app = Flask(__name__)
 CORS(app)
