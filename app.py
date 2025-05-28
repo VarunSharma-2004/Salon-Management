@@ -45,6 +45,7 @@ from flask_cors import CORS
 from flask import render_template
 from urllib.parse import quote
 from dotenv import load_dotenv
+import os
 load_dotenv()
 SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")
 
@@ -67,7 +68,6 @@ def dashboard_page():
 def admindash_page():
     return render_template('dashboard_admin.html')
 # Configure Database
-import os
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = (
     f"mysql+pymysql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}"
