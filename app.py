@@ -1,4 +1,4 @@
-# Create Database
+'''# Create Database
 import sqlite3
 con = sqlite3.connect("salon.db")
 cur = con.cursor()
@@ -34,7 +34,7 @@ cur.execute("""
 """)
 
 con.commit()
-con.close()
+con.close()'''
 
 # API for Users Login
 from flask import Flask, request, jsonify
