@@ -44,6 +44,8 @@ from flask_login import LoginManager, UserMixin
 from flask_cors import CORS
 from flask import render_template
 from urllib.parse import quote
+from dotenv import load_dotenv
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
@@ -66,7 +68,9 @@ def admindash_page():
 # Configure Database
 import os
 basedir = os.path.abspath(os.path.dirname(__file__))
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:1234abcd@containers-us-west-163.railway.app:3306/railway'
+app.config['SQLALCHEMY_DATABASE_URI'] = (
+    f"mysql+pymysql://{os.getenv('DB_USER')}:{password}"
+    f"@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
 db = SQLAlchemy(app)
@@ -94,6 +98,9 @@ class Appointment(db.Model):
     date = db.Column(db.String(50), nullable=False)
     time = db.Column(db.String(50), nullable=False)
     status = db.Column(db.String(20), default="Booked")
+
+with app.app_context():
+    db.create_all()
 
 # User Registration API
 @app.route('/api/register', methods=['POST'])
