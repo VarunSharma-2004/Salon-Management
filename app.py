@@ -43,6 +43,7 @@ from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, UserMixin
 from flask_cors import CORS
 from flask import render_template
+from urllib.parse import quote
 
 app = Flask(__name__)
 CORS(app)
@@ -65,8 +66,8 @@ def admindash_page():
 # Configure Database
 import os
 basedir = os.path.abspath(os.path.dirname(__file__))
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'salon.db')
-app.config['SECRET_KEY'] = 'your_secret_key'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:1234abcd@containers-us-west-163.railway.app:3306/railway'
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
