@@ -65,5 +65,5 @@ tzdata==2025.1
 urllib3==2.3.0
 watchdog==6.0.0
 Werkzeug==3.1.3
-python-dotenv
-PyMySQL
+python-dotenv==1.0.1
+PyMySQL==1.1.0
