@@ -277,6 +277,24 @@ def get_all_appointments():
             "status": appt.status
         } for appt in appointments
     ])
+
+
+@app.route('/appointments/<int:appointment_id>/status', methods=['PATCH'])
+def update_appointment_status(appointment_id):
+    data = request.get_json()
+    new_status = data.get('status')
+
+    if new_status not in ['Accepted', 'Declined']:
+        return jsonify({'error': 'Invalid status'}), 400
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE appointment SET status = ? WHERE id = ?", (new_status, appointment_id))
+    conn.commit()
+    conn.close()
+    return jsonify({'message': 'Status updated successfully'}), 200
+
+
 # Route to send OTP to email
 @app.route('/send_otp', methods=['POST'])
 def send_otp():
