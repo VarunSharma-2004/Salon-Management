@@ -37,7 +37,6 @@ con.commit()
 con.close()'''
 
 # API for Users Login
-from datetime import datetime, timedelta
 from flask_mail import Mail, Message
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
@@ -335,66 +334,6 @@ def reset_password():
     otp_store.pop(email, None)
 
     return jsonify({"success": True, "message": "Password changed successfully."})
-
-
-@app.route('/check-availability', methods=['POST'])
-def check_availability():
-    from datetime import datetime, timedelta
-
-    data = request.get_json()
-    service_id = data['service_id']
-    date = data['date']
-    requested_time_str = data['time']
-
-    requested_time = datetime.strptime(requested_time_str, '%H:%M')
-    service = Service.query.get(service_id)
-    if not service:
-        return jsonify({"error": "Service not found"}), 404
-
-    duration = service.duration
-    end_time = requested_time + timedelta(minutes=duration)
-
-    appointments = Appointment.query.filter_by(date=date).all()
-    slots = [[] for _ in range(6)]  # 6 seats
-
-    for appt in appointments:
-        appt_service = Service.query.get(appt.service_id)
-        appt_start = datetime.strptime(appt.time, '%H:%M')
-        appt_end = appt_start + timedelta(minutes=appt_service.duration)
-
-        for slot in slots:
-            if all(not (appt_start < s_end and appt_end > s_start) for (s_start, s_end) in slot):
-                slot.append((appt_start, appt_end))
-                break
-
-    # Check availability at requested time
-    for slot in slots:
-        if all(not (requested_time < b_end and end_time > b_start) for (b_start, b_end) in slot):
-            return jsonify({
-                "available": True,
-                "message": "Time slot is available for booking."
-            }), 200
-
-    # Search for next available slot in 15-minute increments
-    search_time = requested_time + timedelta(minutes=15)
-    closing_time = datetime.strptime("20:00", "%H:%M")  # assuming salon closes at 8 PM
-
-    while search_time + timedelta(minutes=duration) <= closing_time:
-        end_search_time = search_time + timedelta(minutes=duration)
-        for slot in slots:
-            if all(not (search_time < b_end and end_search_time > b_start) for (b_start, b_end) in slot):
-                return jsonify({
-                    "available": False,
-                    "message": "Requested time is unavailable.",
-                    "suggested_time": search_time.strftime('%H:%M')
-                }), 200
-        search_time += timedelta(minutes=15)
-
-    return jsonify({
-        "available": False,
-        "message": "No available slots today. Please try another date."
-    }), 200
-
 
 if __name__ == '__main__':
     app.run(debug=True)
