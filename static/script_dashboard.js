@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", async () => {
     const userId = localStorage.getItem("user_id");
     if (!userId) {
-        window.location.href = "login.html";
+        window.location.href = "/";
         return;
     }
     
@@ -14,7 +14,7 @@ async function fetchServices() {
     const serviceSelect = document.getElementById("service-select");
 
     try {
-        const response = await fetch("http://127.0.0.1:5000/services");
+        const response = await fetch("/services");
         if (!response.ok) {
             throw new Error("Failed to fetch services");
         }
@@ -44,7 +44,7 @@ async function fetchAppointments() {
     if (!userId) return;
 
     try {
-        const response = await fetch(`http://127.0.0.1:5000/appointments/${userId}`);
+        const response = await fetch(`/appointments/${userId}`);
         if (!response.ok) {
             throw new Error("Failed to fetch appointments");
         }
@@ -80,7 +80,7 @@ async function bookAppointment() {
     const userId = localStorage.getItem("user_id");
     if (!userId) {
         alert("User not logged in. Please log in again.");
-        window.location.href = "login.html";
+        window.location.href = "/";
         return;
     }
 
@@ -102,7 +102,7 @@ async function bookAppointment() {
     }
 
     try {
-        const response = await fetch("http://127.0.0.1:5000/appointments", {
+        const response = await fetch("/appointments", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -131,7 +131,7 @@ async function bookAppointment() {
 
 async function deleteAppointment(appointmentId) {
     try {
-        const response = await fetch(`http://127.0.0.1:5000/appointments/${appointmentId}`, {
+        const response = await fetch(`/appointments/${appointmentId}`, {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json"
@@ -154,5 +154,5 @@ document.getElementById("book-appointment-btn").addEventListener("click", bookAp
 
 function logout() {
     localStorage.removeItem("user_id");
-    window.location.href = "login.html";
+    window.location.href = "/";
 }
