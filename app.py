@@ -43,11 +43,15 @@ from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, UserMixin
 from flask_cors import CORS
 from flask import render_template
+import random
+from flask import redirect, url_for
 from urllib.parse import quote
 from dotenv import load_dotenv
 import os
 load_dotenv()
 SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")
+# Temporary in-memory OTP store: {email: otp}
+otp_store = {}
 
 app = Flask(__name__)
 CORS(app)
@@ -224,12 +228,12 @@ def cancel_appointment(id):
 # Delete Service
 @app.route('/delete_service/<int:id>', methods=['DELETE'])
 def delete_service(id):
-    service = service.query.get(id)
+    service = Service.query.get(id)  # Capital S for model Service
     if not service:
-        return jsonify({"error": "service not found"}), 404
+        return jsonify({"error": "Service not found"}), 404
     db.session.delete(service)
     db.session.commit()
-    return jsonify({"message": "service cancelled successfully!"})
+    return jsonify({"message": "Service deleted successfully!"})
 
 # Fetch all appointments for Admin
 @app.route('/admin/appointments', methods=['GET'])
@@ -253,6 +257,58 @@ def get_all_appointments():
             "status": appt.status
         } for appt in appointments
     ])
+# Route to send OTP to email
+@app.route('/send_otp', methods=['POST'])
+def send_otp():
+    data = request.get_json()
+    email = data.get('email')
+
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        return jsonify({"success": False, "message": "Email not registered."}), 404
+
+    otp = str(random.randint(100000, 999999))
+    otp_store[email] = otp
+
+    # Simulate sending OTP by printing to console (replace with real email logic later)
+    print(f"OTP for {email}: {otp}")
+
+    return jsonify({"success": True, "message": "OTP sent to your email (check console for demo)."})
+
+# Route to verify OTP
+@app.route('/verify_otp', methods=['POST'])
+def verify_otp():
+    data = request.get_json()
+    email = data.get('email')
+    otp = data.get('otp')
+
+    if otp_store.get(email) == otp:
+        return jsonify({"success": True, "message": "OTP verified."})
+    else:
+        return jsonify({"success": False, "message": "Invalid OTP."}), 400
+
+# Route to reset password after OTP verification
+@app.route('/reset_password', methods=['POST'])
+def reset_password():
+    data = request.get_json()
+    email = data.get('email')
+    new_password = data.get('password')
+
+    if not email or not new_password:
+        return jsonify({"success": False, "message": "Missing email or password."}), 400
+
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        return jsonify({"success": False, "message": "User not found."}), 404
+
+    hashed_password = bcrypt.generate_password_hash(new_password).decode('utf-8')
+    user.password = hashed_password
+    db.session.commit()
+
+    # Remove OTP from store after successful reset
+    otp_store.pop(email, None)
+
+    return jsonify({"success": True, "message": "Password changed successfully."})
 
 if __name__ == '__main__':
     app.run(debug=True)
