@@ -46,31 +46,31 @@ function fetchAppointments() {
         .catch(error => console.error("Error fetching appointments:", error));
 }*/
 document.addEventListener("DOMContentLoaded", fetchAppointments);
+
 function fetchAppointments() {
     fetch("/admin/appointments")
-        .then(res => res.json())
+        .then(response => response.json())
         .then(data => {
-            const container = document.getElementById("appointmentList");
-            container.innerHTML = "";
+            const list = document.getElementById("appointments-list");
+            list.innerHTML = ""; // Clear any old data
 
             data.forEach(appt => {
-                const card = document.createElement("div");
-                card.className = "appointment-card";
-                card.innerHTML = `
-                    <p><strong>User:</strong> ${appt.user}</p>
-                    <p><strong>Service:</strong> ${appt.service}</p>
-                    <p><strong>Date:</strong> ${appt.date}</p>
-                    <p><strong>Time:</strong> ${appt.time}</p>
-                    <p><strong>Status:</strong> ${appt.status}</p>
-                    <button onclick="updateStatus(${appt.id}, 'Accepted')">Accept</button>
-                    <button onclick="updateStatus(${appt.id}, 'Declined')">Decline</button>
+                const li = document.createElement("li");
+                li.className = "appointment-item";
+                li.innerHTML = `
+                    <strong>${appt.user}</strong> booked <strong>${appt.service}</strong> 
+                    on <strong>${appt.date}</strong> at <strong>${appt.time}</strong> 
+                    - Status: <strong>${appt.status}</strong>
                 `;
-                container.appendChild(card);
+                list.appendChild(li);
             });
+        })
+        .catch(error => {
+            console.error("Error fetching appointments:", error);
         });
 }
 
-function updateStatus(id, status) {
+/*function updateStatus(id, status) {
     fetch(`/admin/appointment/${id}/status`, {
         method: "PUT",
         headers: {
@@ -80,7 +80,7 @@ function updateStatus(id, status) {
     })
     .then(res => res.json())
     .then(() => fetchAppointments());
-}
+}*/
 
 // Fetch Services
 function fetchServices() {
