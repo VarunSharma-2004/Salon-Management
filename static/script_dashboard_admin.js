@@ -44,64 +44,41 @@ function fetchAppointments() {
         .catch(error => console.error("Error fetching appointments:", error));
 }*/
 
-async function fetchAppointments() {
-    try {
-        const response = await fetch(`/appointments`);
-        if (!response.ok) throw new Error("Failed to fetch appointments");
+function fetchAppointments() {
+    fetch("/admin/appointments")
+        .then(res => res.json())
+        .then(data => {
+            const container = document.getElementById("appointmentList");
+            container.innerHTML = "";
 
-        const appointments = await response.json();
-        const list = document.getElementById("appointments-list");
-        list.innerHTML = "";
-
-        if (appointments.length === 0) {
-            list.innerHTML = "<li>No appointments available.</li>";
-            return;
-        }
-
-        appointments.forEach(appointment => {
-            const li = document.createElement("li");
-            li.innerHTML = `${appointment.service} for User ID ${appointment.user_id} on ${appointment.date} at ${appointment.time} - Status: ${appointment.status}`;
-
-            if (appointment.status === "Booked") {
-                const acceptBtn = document.createElement("button");
-                acceptBtn.textContent = "Accept";
-                acceptBtn.onclick = () => updateStatus(appointment.id, "Accepted");
-
-                const declineBtn = document.createElement("button");
-                declineBtn.textContent = "Decline";
-                declineBtn.onclick = () => updateStatus(appointment.id, "Declined");
-
-                li.appendChild(acceptBtn);
-                li.appendChild(declineBtn);
-            }
-
-            list.appendChild(li);
+            data.forEach(appt => {
+                const card = document.createElement("div");
+                card.className = "appointment-card";
+                card.innerHTML = `
+                    <p><strong>User:</strong> ${appt.user}</p>
+                    <p><strong>Service:</strong> ${appt.service}</p>
+                    <p><strong>Date:</strong> ${appt.date}</p>
+                    <p><strong>Time:</strong> ${appt.time}</p>
+                    <p><strong>Status:</strong> ${appt.status}</p>
+                    <button onclick="updateStatus(${appt.id}, 'Accepted')">Accept</button>
+                    <button onclick="updateStatus(${appt.id}, 'Declined')">Decline</button>
+                `;
+                container.appendChild(card);
+            });
         });
-    } catch (error) {
-        console.error("Error:", error);
-    }
 }
 
-async function updateStatus(appointmentId, newStatus) {
-    try {
-        const response = await fetch(`/appointments/${appointmentId}/status`, {
-            method: "PATCH",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ status: newStatus })
-        });
-
-        if (!response.ok) throw new Error("Failed to update status");
-
-        alert(`Appointment ${newStatus}`);
-        await fetchAppointments();
-    } catch (error) {
-        console.error("Error updating status:", error);
-        alert("Error updating status");
-    }
+function updateStatus(id, status) {
+    fetch(`/admin/appointment/${id}/status`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status }),
+    })
+    .then(res => res.json())
+    .then(() => fetchAppointments());
 }
-
 
 // Fetch Services
 function fetchServices() {
