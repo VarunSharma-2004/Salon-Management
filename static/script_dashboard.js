@@ -1,10 +1,29 @@
+async function fetchUserName() {
+    const userId = localStorage.getItem("user_id");
+    if (!userId) return;
+
+    try {
+        const response = await fetch(`/user/${userId}`);
+        if (!response.ok) throw new Error("Failed to fetch user");
+
+        const user = await response.json();
+        const nameElement = document.getElementById("user-name");
+        if (nameElement && user.name) {
+            nameElement.textContent = `Hello, ${user.name}`;
+        }
+    } catch (error) {
+        console.error("Error fetching user name:", error);
+    }
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
     const userId = localStorage.getItem("user_id");
     if (!userId) {
         window.location.href = "/";
         return;
     }
-    
+
+    await fetchUserName();
     await fetchServices();
     await fetchAppointments();
 });
