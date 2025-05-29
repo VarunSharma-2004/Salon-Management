@@ -10,19 +10,19 @@ document.addEventListener("DOMContentLoaded", () => {
 // Check Authentication
 function checkAuth() {
     if (localStorage.getItem("authenticated") !== "true") {
-        window.location.href = "admin_login.html";
+        window.location.href = "/adminlogin";
     }
 }
 
 // Logout Function
 function logout() {
     localStorage.removeItem("authenticated");
-    window.location.href = "admin_login.html";
+    window.location.href = "/adminlogin";
 }
 
 // Fetch Appointments
 function fetchAppointments() {
-    fetch("http://localhost:5000/admin/appointments")
+    fetch("/admin/appointments")
         .then(response => response.json())
         .then(data => {
             console.log("API Response:", data); // Debugging output
@@ -46,7 +46,7 @@ function fetchAppointments() {
 
 // Fetch Services
 function fetchServices() {
-    fetch("http://localhost:5000/admin/services")
+    fetch("/admin/services")
         .then(response => response.json())
         .then(data => {
             const serviceList = document.getElementById("services-list");
@@ -68,7 +68,7 @@ function addService(event) {
     const price = document.getElementById("service-price").value;
     const duration = document.getElementById("service-duration").value;
 
-    fetch("http://localhost:5000/admin/services", {
+    fetch("/admin/services", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: serviceName, price: price, duration: duration })
@@ -83,7 +83,7 @@ function addService(event) {
 
 // Delete Service
 function deleteService(serviceId) {
-    fetch(`http://localhost:5000/admin/services/${serviceId}`, { method: "DELETE" })
+    fetch(`/admin/services/${serviceId}`, { method: "DELETE" })
     .then(() => fetchServices())
     .catch(error => console.error("Error deleting service:", error));
 }
