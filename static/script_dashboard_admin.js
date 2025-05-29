@@ -20,7 +20,7 @@ function logout() {
     window.location.href = "/adminlogin";
 }
 
-/*// Fetch Appointments
+// Fetch Appointments
 function fetchAppointments() {
     fetch("/admin/appointments")
         .then(response => response.json())
@@ -38,13 +38,15 @@ function fetchAppointments() {
 
                 const listItem = document.createElement("li");
                 listItem.textContent = `${customerName} - ${service} (${date} at ${time})`;
+                <button onclick="updateStatus(${appt.id}, 'Accepted')">Accept</button>
+                <button onclick="updateStatus(${appt.id}, 'Declined')">Decline</button>
                 appointmentList.appendChild(listItem);
             });
         })
         .catch(error => console.error("Error fetching appointments:", error));
-}*/
+}
 
-function fetchAppointments() {
+/*function fetchAppointments() {
     fetch("/admin/appointments")
         .then(res => res.json())
         .then(data => {
@@ -66,7 +68,7 @@ function fetchAppointments() {
                 container.appendChild(card);
             });
         });
-}
+}*/
 
 function updateStatus(id, status) {
     fetch(`/admin/appointment/${id}/status`, {
