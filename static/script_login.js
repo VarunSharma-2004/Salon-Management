@@ -1,6 +1,27 @@
 document.addEventListener("DOMContentLoaded", () => {
     document.querySelector(".login").addEventListener("click", login);
 });
+document.getElementById("login-button").addEventListener("click", async function () {
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    const message = document.getElementById("message");
+
+    const response = await fetch("/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+    });
+
+    const data = await response.json();
+    message.textContent = data.message;
+
+    if (data.success) {
+        window.location.href = "/dashboard";
+    } else {
+        // Show forgot password link after 1st failed attempt
+        document.getElementById("forgot-password-link").style.display = "block";
+    }
+});
 
 async function login() {
     const email = document.getElementById("email").value;
