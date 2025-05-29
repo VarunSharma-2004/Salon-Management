@@ -20,7 +20,7 @@ function logout() {
     window.location.href = "/adminlogin";
 }
 
-// Fetch Appointments
+/*// Fetch Appointments
 function fetchAppointments() {
     fetch("/admin/appointments")
         .then(response => response.json())
@@ -42,7 +42,66 @@ function fetchAppointments() {
             });
         })
         .catch(error => console.error("Error fetching appointments:", error));
+}*/
+
+async function fetchAppointments() {
+    try {
+        const response = await fetch(`/appointments`);
+        if (!response.ok) throw new Error("Failed to fetch appointments");
+
+        const appointments = await response.json();
+        const list = document.getElementById("appointments-list");
+        list.innerHTML = "";
+
+        if (appointments.length === 0) {
+            list.innerHTML = "<li>No appointments available.</li>";
+            return;
+        }
+
+        appointments.forEach(appointment => {
+            const li = document.createElement("li");
+            li.innerHTML = `${appointment.service} for User ID ${appointment.user_id} on ${appointment.date} at ${appointment.time} - Status: ${appointment.status}`;
+
+            if (appointment.status === "Booked") {
+                const acceptBtn = document.createElement("button");
+                acceptBtn.textContent = "Accept";
+                acceptBtn.onclick = () => updateStatus(appointment.id, "Accepted");
+
+                const declineBtn = document.createElement("button");
+                declineBtn.textContent = "Decline";
+                declineBtn.onclick = () => updateStatus(appointment.id, "Declined");
+
+                li.appendChild(acceptBtn);
+                li.appendChild(declineBtn);
+            }
+
+            list.appendChild(li);
+        });
+    } catch (error) {
+        console.error("Error:", error);
+    }
 }
+
+async function updateStatus(appointmentId, newStatus) {
+    try {
+        const response = await fetch(`/appointments/${appointmentId}/status`, {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ status: newStatus })
+        });
+
+        if (!response.ok) throw new Error("Failed to update status");
+
+        alert(`Appointment ${newStatus}`);
+        await fetchAppointments();
+    } catch (error) {
+        console.error("Error updating status:", error);
+        alert("Error updating status");
+    }
+}
+
 
 // Fetch Services
 function fetchServices() {
