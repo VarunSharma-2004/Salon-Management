@@ -20,7 +20,7 @@ function logout() {
     window.location.href = "/adminlogin";
 }
 
-// Fetch Appointments
+/*// Fetch Appointments
 function fetchAppointments() {
     fetch("/admin/appointments")
         .then(response => response.json())
@@ -44,9 +44,9 @@ function fetchAppointments() {
             });
         })
         .catch(error => console.error("Error fetching appointments:", error));
-}
-
-/*function fetchAppointments() {
+}*/
+document.addEventListener("DOMContentLoaded", fetchAppointments);
+function fetchAppointments() {
     fetch("/admin/appointments")
         .then(res => res.json())
         .then(data => {
@@ -68,7 +68,7 @@ function fetchAppointments() {
                 container.appendChild(card);
             });
         });
-}*/
+}
 
 function updateStatus(id, status) {
     fetch(`/admin/appointment/${id}/status`, {
