@@ -47,6 +47,7 @@ async function login() {
             setTimeout(() => window.location.href = "/dashboard", 1500);
         } else {
             showMessage(result.error || "Login failed. Please try again.", "error");
+            document.getElementById("forgot-password-link").style.display = "block";
         }
     } catch (error) {
         showMessage("Server error. Please try again later.", "error");
