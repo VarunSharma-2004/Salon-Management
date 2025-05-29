@@ -51,6 +51,10 @@ from dotenv import load_dotenv
 import os
 load_dotenv()
 SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")
+
+app = Flask(__name__)
+CORS(app)
+
 app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER')
 app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT'))
 app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS') == 'True'
@@ -61,9 +65,6 @@ mail = Mail(app)
 
 # Temporary in-memory OTP store: {email: otp}
 otp_store = {}
-
-app = Flask(__name__)
-CORS(app)
 
 @app.route('/', methods=['GET', 'HEAD'])
 def home():
