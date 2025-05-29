@@ -153,6 +153,25 @@ li:hover {
     transform: scale(1.03);
 }
 
+button {
+    margin-left: 10px;
+    padding: 4px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #4CAF50;
+    color: white;
+}
+
+button:hover {
+    opacity: 0.8;
+}
+
+button:nth-child(3) { /* Decline button */
+    background-color: #f44336;
+}
+
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .dashboard-container {
