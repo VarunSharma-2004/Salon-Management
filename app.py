@@ -279,20 +279,19 @@ def get_all_appointments():
     ])
 
 
-@app.route('/appointments/<int:appointment_id>/status', methods=['PATCH'])
+@app.route('/admin/appointment/<int:appointment_id>/status', methods=['PUT'])
 def update_appointment_status(appointment_id):
     data = request.get_json()
-    new_status = data.get('status')
+    new_status = data.get("status")
 
-    if new_status not in ['Accepted', 'Declined']:
-        return jsonify({'error': 'Invalid status'}), 400
+    appointment = Appointment.query.get(appointment_id)
+    if not appointment:
+        return jsonify({"error": "Appointment not found"}), 404
 
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("UPDATE appointment SET status = ? WHERE id = ?", (new_status, appointment_id))
-    conn.commit()
-    conn.close()
-    return jsonify({'message': 'Status updated successfully'}), 200
+    appointment.status = new_status
+    db.session.commit()
+
+    return jsonify({"message": f"Appointment status updated to {new_status}"})
 
 
 # Route to send OTP to email
