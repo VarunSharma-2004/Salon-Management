@@ -71,6 +71,16 @@ def dashboard_page():
 @app.route('/admindash', methods=['GET'])
 def admindash_page():
     return render_template('dashboard_admin.html')
+# Route to render Forgot Password page
+@app.route('/forgot_password')
+def forgot_password_page():
+    return render_template("forget_password.html")
+# Route to render Reset Password page
+@app.route('/reset_password.html')
+def reset_password_page():
+    return render_template("reset_password.html")
+
+
 # Configure Database
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
