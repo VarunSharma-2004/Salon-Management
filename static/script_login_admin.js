@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
         
         if (email === "salon@gmail.com" && password === "Salon@123") {
             localStorage.setItem("authenticated", "true");
-            window.location.href = "/dashboard_admin";
+            window.location.href = "/admindash";
         } else {
             alert("Invalid credentials! Please try again.");
         }
