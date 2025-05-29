@@ -41,37 +41,6 @@
     <footer>
         <button class="logout-btn" onclick="logout()">Logout</button>
     </footer>
-    
-    <script>
-        document.addEventListener("DOMContentLoaded", async () => {
-            const userId = localStorage.getItem("user_id");
-            
-            if (!userId) {
-                window.location.href = "/";
-                return;
-            }
-    
-            // Fetch user details from the backend
-            try {
-                const response = await fetch(`http://127.0.0.1:5000/user/${userId}`);
-                const userData = await response.json();
-    
-                if (userData.name) {
-                    document.getElementById("user-name").textContent = userData.name;
-                } else {
-                    document.getElementById("user-name").textContent = "Guest";
-                }
-            } catch (error) {
-                console.error("Error fetching user details:", error);
-                document.getElementById("user-name").textContent = "Guest";
-            }
-        });
-
-        function logout() {
-            localStorage.removeItem("user_id");
-            window.location.href = "/";
-        }
-    </script>
 
     <script src="{{ url_for('static', filename='script_dashboard.js')}}"></script>
 
