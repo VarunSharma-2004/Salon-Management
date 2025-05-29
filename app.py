@@ -37,6 +37,16 @@ con.commit()
 con.close()'''
 
 # API for Users Login
+from flask_mail import Mail, Message
+
+app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER')
+app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT'))
+app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS') == 'True'
+app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
+app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER')
+mail = Mail(app)
+
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
@@ -280,10 +290,15 @@ def send_otp():
     otp = str(random.randint(100000, 999999))
     otp_store[email] = otp
 
-    # Simulate sending OTP by printing to console (replace with real email logic later)
-    print(f"OTP for {email}: {otp}")
-
-    return jsonify({"success": True, "message": "OTP sent to your email (check console for demo)."})
+    # Send the email with Flask-Mail
+    try:
+        msg = Message("Your OTP Code", sender=app.config['MAIL_USERNAME'], recipients=[email])
+        msg.body = f"Your OTP is: {otp}"
+        mail.send(msg)
+        return jsonify({"success": True, "message": "OTP sent to your email."})
+    except Exception as e:
+        print("Email sending failed:", e)
+        return jsonify({"success": False, "message": "Failed to send OTP."}), 500
 
 # Route to verify OTP
 @app.route('/verify_otp', methods=['POST'])
