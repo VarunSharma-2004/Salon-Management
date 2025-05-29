@@ -12,7 +12,6 @@ body {
     padding: 20px;
     color: white;
     transition: background 0.3s ease-in-out;
-    overflow: hidden;
     height: 100%;
 }
 
