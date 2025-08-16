@@ -101,8 +101,16 @@ if db_url and db_url.startswith("mysql://"):
 
 app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+# Define engine options to enforce a secure SSL connection
+engine_options = {
+    "connect_args": {
+        # Use underscore and a secure setting
+        "ssl_mode": "VERIFY_IDENTITY",
+        "ssl_ca": "/etc/ssl/certs/ca-certificates.crt"
+    }
+}
 
-db = SQLAlchemy(app)
+db = SQLAlchemy(app, engine_options=engine_options)
 bcrypt = Bcrypt(app)
 login_manager = LoginManager(app)
 login_manager.init_app(app)
