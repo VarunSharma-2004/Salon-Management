@@ -101,11 +101,10 @@ if db_url and db_url.startswith("mysql://"):
 
 app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
-# Define engine options to enforce a secure SSL connection
+# Simplified engine options to enforce a secure SSL connection
 engine_options = {
     "connect_args": {
-        # Use underscore and a secure setting
-        "ssl_mode": "VERIFY_IDENTITY",
+        # This single argument tells PyMySQL to use SSL and verify the certificate
         "ssl_ca": "/etc/ssl/certs/ca-certificates.crt"
     }
 }
