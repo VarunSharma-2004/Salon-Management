@@ -49,6 +49,8 @@ from flask import redirect, url_for
 from urllib.parse import quote
 from dotenv import load_dotenv
 import os
+from sqlalchemy.pool import NullPool
+
 load_dotenv()
 SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")
 
