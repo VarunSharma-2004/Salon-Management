@@ -104,11 +104,19 @@ if db_url and db_url.startswith("mysql://"):
 app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 # Simplified engine options to enforce a secure SSL connection
+# engine_options = {
+#     "connect_args": {
+#         # This single argument tells PyMySQL to use SSL and verify the certificate
+#         "ssl_ca": "/etc/ssl/certs/ca-certificates.crt"
+#     }
+# }
+
 engine_options = {
     "connect_args": {
-        # This single argument tells PyMySQL to use SSL and verify the certificate
         "ssl_ca": "/etc/ssl/certs/ca-certificates.crt"
-    }
+    },
+    "pool_class": NullPool, # <--- ADD THIS LINE
+    "pool_recycle": 280     # Optional: recycles connections before timeouts
 }
 
 db = SQLAlchemy(app, engine_options=engine_options)
@@ -137,8 +145,8 @@ class Appointment(db.Model):
     time = db.Column(db.String(50), nullable=False)
     status = db.Column(db.String(20), default="Booked")
 
-with app.app_context():
-    db.create_all()
+# with app.app_context():
+#     db.create_all()
 
 # User Registration API
 @app.route('/api/register', methods=['POST'])
