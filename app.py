@@ -1,326 +1,340 @@
-'''# Create Database
-import sqlite3
-con = sqlite3.connect("salon.db")
-cur = con.cursor()
-cur.execute("""
-    CREATE TABLE IF NOT EXISTS users(
-        Id INTEGER PRIMARY KEY AUTOINCREMENT, 
-        name TEXT NOT NULL, 
-        email TEXT UNIQUE, 
-        password TEXT NOT NULL, 
-        phone TEXT NOT NULL
-    )
-""")
-
-cur.execute("""
-    CREATE TABLE IF NOT EXISTS appointments(
-        Id INTEGER PRIMARY KEY AUTOINCREMENT, 
-        user_id INTEGER NOT NULL, 
-        service_id INTEGER NOT NULL, 
-        date TEXT NOT NULL, 
-        time TEXT NOT NULL, 
-        status TEXT DEFAULT 'Booked',
-        FOREIGN KEY(user_id) REFERENCES users(Id),
-        FOREIGN KEY(service_id) REFERENCES services(Id)
-    )
-""")
-cur.execute("""
-    CREATE TABLE IF NOT EXISTS services(
-        Id INTEGER PRIMARY KEY AUTOINCREMENT, 
-        name TEXT NOT NULL UNIQUE,  -- Prevent duplicate services
-        price INTEGER NOT NULL, 
-        duration INTEGER NOT NULL
-    )
-""")
-
-con.commit()
-con.close()'''
-
-# API for Users Login
+from flask import Flask, request, jsonify, render_template
 from flask_mail import Mail, Message
-from flask import Flask, request, jsonify
-from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, UserMixin
 from flask_cors import CORS
-from flask import render_template
-import random
-from flask import redirect, url_for
-from urllib.parse import quote
+from flask_pymongo import PyMongo
+from bson.objectid import ObjectId
 from dotenv import load_dotenv
 import os
+import random
+
+# Load environment variables
 load_dotenv()
-SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")
 
 app = Flask(__name__)
 CORS(app)
 
+# --- Configuration ---
+# MongoDB URI from .env (e.g., mongodb+srv://user:pass@cluster.mongodb.net/dbname)
+app.config['MONGO_URI'] = os.getenv("MONGO_URI")
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+
+# Mail Configuration
 app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER')
-app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT'))
+app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT') or 587)
 app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS') == 'True'
 app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
 app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
 app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER')
+
+# --- Initialize Extensions ---
+mongo = PyMongo(app)
+bcrypt = Bcrypt(app)
 mail = Mail(app)
+login_manager = LoginManager(app)
 
 # Temporary in-memory OTP store: {email: otp}
 otp_store = {}
 
+# --- HELPER CLASSES & FUNCTIONS ---
+
+class User(UserMixin):
+    """
+    Wrapper class to make MongoDB documents compatible with Flask-Login.
+    Flask-Login expects an object with an 'id' attribute.
+    """
+    def __init__(self, user_doc):
+        self.id = str(user_doc['_id'])
+        self.name = user_doc['name']
+        self.email = user_doc['email']
+        self.password = user_doc['password']
+
+@login_manager.user_loader
+def load_user(user_id):
+    try:
+        user_doc = mongo.db.users.find_one({"_id": ObjectId(user_id)})
+        if user_doc:
+            return User(user_doc)
+        return None
+    except:
+        return None
+
+# --- HTML ROUTES (FRONTEND) ---
+
 @app.route('/', methods=['GET', 'HEAD'])
 def home():
     return render_template('login.html')
+
 @app.route('/register', methods=['GET'])
 def register_page():
     return render_template('register.html')
+
 @app.route('/adminlogin', methods=['GET'])
 def admin_page():
     return render_template('admin_login.html')
+
 @app.route('/dashboard', methods=['GET'])
 def dashboard_page():
     return render_template('dashboard.html')
+
 @app.route('/admindash', methods=['GET'])
 def admindash_page():
     return render_template('dashboard_admin.html')
-# Route to render Forgot Password page
+
 @app.route('/forgot_password')
 def forgot_password_page():
     return render_template("forget_password.html")
-# Route to render Reset Password page
+
 @app.route('/reset_password.html')
 def reset_password_page():
     return render_template("reset_password.html")
 
+# --- API ROUTES (BACKEND) ---
 
-# Configure Database
-basedir = os.path.abspath(os.path.dirname(__file__))
-
-# Get the database URL and replace the scheme for PyMySQL
-db_url = os.getenv("DATABASE_URL")
-if db_url and db_url.startswith("mysql://"):
-    db_url = db_url.replace("mysql://", "mysql+pymysql://", 1)
-
-app.config['SQLALCHEMY_DATABASE_URI'] = db_url
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
-# Simplified engine options to enforce a secure SSL connection
-engine_options = {
-    "connect_args": {
-        # This single argument tells PyMySQL to use SSL and verify the certificate
-        "ssl_ca": "/etc/ssl/certs/ca-certificates.crt"
-    }
-}
-
-db = SQLAlchemy(app, engine_options=engine_options)
-bcrypt = Bcrypt(app)
-login_manager = LoginManager(app)
-login_manager.init_app(app)
-
-# Database Models
-class User(db.Model, UserMixin):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(80), nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    password = db.Column(db.String(120), nullable=False)
-
-class Service(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    price = db.Column(db.Float, nullable=False)
-    duration = db.Column(db.Integer, nullable=False)  # in minutes
-
-class Appointment(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    service_id = db.Column(db.Integer, db.ForeignKey('service.id'), nullable=False)
-    date = db.Column(db.String(50), nullable=False)
-    time = db.Column(db.String(50), nullable=False)
-    status = db.Column(db.String(20), default="Booked")
-
-with app.app_context():
-    db.create_all()
-
-# User Registration API
+# User Registration
 @app.route('/api/register', methods=['POST'])
 def register():
     data = request.get_json()
+    
+    # Check if user already exists
+    if mongo.db.users.find_one({"email": data['email']}):
+        return jsonify({"error": "User already exists"}), 400
+
     hashed_password = bcrypt.generate_password_hash(data['password']).decode('utf-8')
     
-    new_user = User(name=data['name'], email=data['email'], password=hashed_password)
-    db.session.add(new_user)
-    db.session.commit()
+    # Insert new user
+    result = mongo.db.users.insert_one({
+        "name": data['name'],
+        "email": data['email'],
+        "password": hashed_password
+    })
     
-    return jsonify({"message": "User registered successfully!"}), 201
+    return jsonify({"message": "User registered successfully!", "id": str(result.inserted_id)}), 201
 
 # User Login
 @app.route('/api/login', methods=['POST'])
 def login():
     data = request.get_json()
-    user = User.query.filter_by(email=data['email']).first()
+    user = mongo.db.users.find_one({"email": data['email']})
     
-    if user and bcrypt.check_password_hash(user.password, data['password']):
-        return jsonify({"message": "Login successful!", "user_id": user.id, "name": user.name})
+    if user and bcrypt.check_password_hash(user['password'], data['password']):
+        return jsonify({
+            "message": "Login successful!", 
+            "user_id": str(user['_id']), 
+            "name": user['name']
+        })
     
     return jsonify({"error": "Invalid email or password"}), 401
 
-#Get User Name
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
-@app.route('/user/<int:user_id>', methods=['GET'])
+# Get User Details
+@app.route('/user/<user_id>', methods=['GET'])
 def get_user(user_id):
-    user = User.query.get(user_id)
-    if not user:
-        return jsonify({"error": "User not found"}), 404
-    return jsonify({"name": user.name})
+    try:
+        user = mongo.db.users.find_one({"_id": ObjectId(user_id)})
+        if not user:
+            return jsonify({"error": "User not found"}), 404
+        return jsonify({"name": user['name']})
+    except:
+        return jsonify({"error": "Invalid User ID format"}), 400
 
 # Add Services 
 @app.route('/add_service', methods=['POST'])
 def add_service():
     data = request.json
-    new_service = Service(name=data['name'], price=data['price'], duration=data['duration'])
-    db.session.add(new_service)
-    db.session.commit()
+    # Ensure no duplicate names
+    if mongo.db.services.find_one({"name": data['name']}):
+        return jsonify({"error": "Service already exists"}), 400
+
+    mongo.db.services.insert_one({
+        "name": data['name'],
+        "price": data['price'],
+        "duration": data['duration']
+    })
     return jsonify({'message': 'Service added successfully!'})
 
 # Fetch Services
 @app.route('/services', methods=['GET'])
 def get_services():
-    services = Service.query.all()
-    return jsonify([{ "id": s.id, "name": s.name, "price": s.price, "duration": s.duration } for s in services])
+    services = mongo.db.services.find()
+    result = []
+    for s in services:
+        result.append({
+            "id": str(s['_id']),
+            "name": s['name'],
+            "price": s['price'],
+            "duration": s['duration']
+        })
+    return jsonify(result)
 
 # Book Appointment
 @app.route('/appointments', methods=['POST'])
 def book_appointment():
     data = request.get_json()
-    max_slots = 5  # Maximum allowed bookings per time slot
+    max_slots = 5  
+    
+    user_id = data['user_id']
+    service_id = data['service_id']
+    date = data['date']
+    time = data['time']
 
-    # Check if the same user already booked this service at the same date & time
-    existing_appointment = Appointment.query.filter_by(
-        user_id=data['user_id'],
-        service_id=data['service_id'],
-        date=data['date'],
-        time=data['time']
-    ).first()
+    # 1. Check if the same user already booked this service at the same date & time
+    existing_appointment = mongo.db.appointments.find_one({
+        "user_id": user_id,
+        "service_id": service_id,
+        "date": date,
+        "time": time
+    })
 
     if existing_appointment:
         return jsonify({"error": "You already have this service booked at this time!"}), 400
 
-    # Check if the time slot is full
-    existing_appointments_count = Appointment.query.filter_by(
-        date=data['date'],
-        time=data['time']
-    ).count()
+    # 2. Check if the time slot is full (count appointments at this specific date/time)
+    count = mongo.db.appointments.count_documents({
+        "date": date,
+        "time": time
+    })
 
-    if existing_appointments_count >= max_slots:
+    if count >= max_slots:
         return jsonify({"error": "Slots are full for your selected time interval. Kindly choose another time."}), 400
 
-    # Proceed with booking if slots are available
-    new_appointment = Appointment(
-        user_id=data['user_id'],
-        service_id=data['service_id'],
-        date=data['date'],
-        time=data['time']
-    )
-    db.session.add(new_appointment)
-    db.session.commit()
+    # 3. Book the appointment
+    mongo.db.appointments.insert_one({
+        "user_id": user_id, 
+        "service_id": service_id,
+        "date": date,
+        "time": time,
+        "status": "Booked"
+    })
     
     return jsonify({"message": "Appointment booked successfully!"}), 201
 
-
-# View Appointments
-@app.route('/appointments/<int:user_id>', methods=['GET'])
+# View Appointments (User)
+@app.route('/appointments/<user_id>', methods=['GET'])
 def view_appointments(user_id):
-    appointments = db.session.query(
-        Appointment.id, 
-        Service.name.label("service_name"),  # Fetch service name properly
-        Appointment.date, 
-        Appointment.time, 
-        Appointment.status
-    ).join(Service, Appointment.service_id == Service.id).filter(Appointment.user_id == user_id).all()
+    # MongoDB Aggregation to "Join" services collection to get Service Name
+    pipeline = [
+        {"$match": {"user_id": user_id}},
+        # Convert string service_id to ObjectId for the lookup
+        {"$addFields": {"serviceObjectId": {"$toObjectId": "$service_id"}}}, 
+        {"$lookup": {
+            "from": "services",
+            "localField": "serviceObjectId",
+            "foreignField": "_id",
+            "as": "service_details"
+        }},
+        {"$unwind": "$service_details"} # Flatten the array
+    ]
+    
+    appointments = list(mongo.db.appointments.aggregate(pipeline))
+    
+    result = []
+    for appt in appointments:
+        result.append({
+            "id": str(appt['_id']),
+            "service": appt['service_details']['name'],
+            "date": appt['date'],
+            "time": appt['time'],
+            "status": appt['status']
+        })
 
-    return jsonify([
-        {
-            "id": appt.id,
-            "service": appt.service_name,  # Ensure service name is used
-            "date": appt.date,
-            "time": appt.time,
-            "status": appt.status
-        } for appt in appointments
-    ])
-
+    return jsonify(result)
 
 # Cancel Appointment
-@app.route('/appointments/<int:id>', methods=['DELETE'])
+@app.route('/appointments/<id>', methods=['DELETE'])
 def cancel_appointment(id):
-    appointment = Appointment.query.get(id)
-    if not appointment:
-        return jsonify({"error": "Appointment not found"}), 404
-    db.session.delete(appointment)
-    db.session.commit()
-    return jsonify({"message": "Appointment cancelled successfully!"})
+    try:
+        result = mongo.db.appointments.delete_one({"_id": ObjectId(id)})
+        if result.deleted_count == 0:
+            return jsonify({"error": "Appointment not found"}), 404
+        return jsonify({"message": "Appointment cancelled successfully!"})
+    except:
+        return jsonify({"error": "Invalid ID format"}), 400
 
 # Delete Service
-@app.route('/delete_service/<int:id>', methods=['DELETE'])
+@app.route('/delete_service/<id>', methods=['DELETE'])
 def delete_service(id):
-    service = Service.query.get(id)  # Capital S for model Service
-    if not service:
-        return jsonify({"error": "Service not found"}), 404
-    db.session.delete(service)
-    db.session.commit()
-    return jsonify({"message": "Service deleted successfully!"})
+    try:
+        result = mongo.db.services.delete_one({"_id": ObjectId(id)})
+        if result.deleted_count == 0:
+            return jsonify({"error": "Service not found"}), 404
+        return jsonify({"message": "Service deleted successfully!"})
+    except:
+        return jsonify({"error": "Invalid ID format"}), 400
 
 # Fetch all appointments for Admin
 @app.route('/admin/appointments', methods=['GET'])
 def get_all_appointments():
-    appointments = db.session.query(
-        Appointment.id, 
-        User.name.label("user_name"),
-        Service.name.label("service_name"),
-        Appointment.date, 
-        Appointment.time, 
-        Appointment.status
-    ).join(User, Appointment.user_id == User.id).join(Service, Appointment.service_id == Service.id).all()
+    # Join Users AND Services to get names
+    pipeline = [
+        {"$addFields": {
+            "userObjectId": {"$toObjectId": "$user_id"},
+            "serviceObjectId": {"$toObjectId": "$service_id"}
+        }},
+        {"$lookup": {
+            "from": "users",
+            "localField": "userObjectId",
+            "foreignField": "_id",
+            "as": "user_details"
+        }},
+        {"$lookup": {
+            "from": "services",
+            "localField": "serviceObjectId",
+            "foreignField": "_id",
+            "as": "service_details"
+        }},
+        # Unwind to get objects instead of arrays (Note: verify data integrity, if user deleted this might fail)
+        {"$unwind": "$user_details"},
+        {"$unwind": "$service_details"}
+    ]
 
-    return jsonify([
-        {
-            "id": appt.id,
-            "user": appt.user_name,
-            "service": appt.service_name,
-            "date": appt.date,
-            "time": appt.time,
-            "status": appt.status
-        } for appt in appointments
-    ])
+    appointments = list(mongo.db.appointments.aggregate(pipeline))
 
+    result = []
+    for appt in appointments:
+        result.append({
+            "id": str(appt['_id']),
+            "user": appt['user_details']['name'],
+            "service": appt['service_details']['name'],
+            "date": appt['date'],
+            "time": appt['time'],
+            "status": appt['status']
+        })
 
-@app.route('/admin/appointment/<int:appointment_id>/status', methods=['PUT'])
+    return jsonify(result)
+
+# Admin Update Status
+@app.route('/admin/appointment/<appointment_id>/status', methods=['PUT'])
 def update_appointment_status(appointment_id):
     data = request.get_json()
     new_status = data.get("status")
 
-    appointment = Appointment.query.get(appointment_id)
-    if not appointment:
-        return jsonify({"error": "Appointment not found"}), 404
+    try:
+        result = mongo.db.appointments.update_one(
+            {"_id": ObjectId(appointment_id)},
+            {"$set": {"status": new_status}}
+        )
 
-    appointment.status = new_status
-    db.session.commit()
+        if result.matched_count == 0:
+            return jsonify({"error": "Appointment not found"}), 404
 
-    return jsonify({"message": f"Appointment status updated to {new_status}"})
+        return jsonify({"message": f"Appointment status updated to {new_status}"})
+    except:
+        return jsonify({"error": "Invalid ID format"}), 400
 
-
-# Route to send OTP to email
+# Send OTP
 @app.route('/send_otp', methods=['POST'])
 def send_otp():
     data = request.get_json()
     email = data.get('email')
 
-    user = User.query.filter_by(email=email).first()
+    user = mongo.db.users.find_one({"email": email})
     if not user:
         return jsonify({"success": False, "message": "Email not registered."}), 404
 
     otp = str(random.randint(100000, 999999))
     otp_store[email] = otp
 
-    # Send the email with Flask-Mail
     try:
         msg = Message("Your OTP Code", sender=app.config['MAIL_USERNAME'], recipients=[email])
         msg.body = f"Your OTP is: {otp}"
@@ -330,7 +344,7 @@ def send_otp():
         print("Email sending failed:", e)
         return jsonify({"success": False, "message": "Failed to send OTP."}), 500
 
-# Route to verify OTP
+# Verify OTP
 @app.route('/verify_otp', methods=['POST'])
 def verify_otp():
     data = request.get_json()
@@ -342,7 +356,7 @@ def verify_otp():
     else:
         return jsonify({"success": False, "message": "Invalid OTP."}), 400
 
-# Route to reset password after OTP verification
+# Reset Password
 @app.route('/reset_password', methods=['POST'])
 def reset_password():
     data = request.get_json()
@@ -352,15 +366,14 @@ def reset_password():
     if not email or not new_password:
         return jsonify({"success": False, "message": "Missing email or password."}), 400
 
-    user = User.query.filter_by(email=email).first()
+    user = mongo.db.users.find_one({"email": email})
     if not user:
         return jsonify({"success": False, "message": "User not found."}), 404
 
     hashed_password = bcrypt.generate_password_hash(new_password).decode('utf-8')
-    user.password = hashed_password
-    db.session.commit()
+    mongo.db.users.update_one({"email": email}, {"$set": {"password": hashed_password}})
 
-    # Remove OTP from store after successful reset
+    # Remove OTP after successful reset
     otp_store.pop(email, None)
 
     return jsonify({"success": True, "message": "Password changed successfully."})
